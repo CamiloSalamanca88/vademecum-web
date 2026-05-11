@@ -142,7 +142,7 @@ public class MainView extends HorizontalLayout {
         formaRow2.setWidthFull();
         formaRow2.setSpacing(true);
 
-        Button btnGotas      = buildFormaBtn("💧 Gotas",       "gotas");
+        Button btnGotas = buildFormaBtn("💧 Dilución", "Dil");
         Button btnTrituracion = buildFormaBtn("⚗️ Trituración", "trit");
         Button btnUngüento   = buildFormaBtn("🫙 Ungüento",     "ung");
         Button btnOleo       = buildFormaBtn("🌱 Oleo",         "oleo");
