@@ -524,9 +524,9 @@ public class MainView extends HorizontalLayout {
     }
     private VerticalLayout buildFiltroAlfabetico() {
         VerticalLayout wrapper = new VerticalLayout();
-        wrapper.setPadding(true);
+        wrapper.setPadding(false);
         wrapper.setSpacing(false);
-        wrapper.getStyle().set("gap", "4px").set("padding-top", "0").set("padding-bottom", "0");
+        wrapper.getStyle().set("gap", "4px").set("padding", "8px 16px 4px 16px");
 
         Span lbl = new Span("🔤  Filtrar por letra");
         lbl.getStyle().set("font-size", "11px").set("font-weight", "bold")
@@ -546,11 +546,13 @@ public class MainView extends HorizontalLayout {
 
         HorizontalLayout row1 = new HorizontalLayout();
         row1.setWidthFull();
-        row1.setSpacing(true);
+        row1.setSpacing(false);
+        row1.getStyle().set("gap", "4px");
 
         HorizontalLayout row2 = new HorizontalLayout();
         row2.setWidthFull();
-        row2.setSpacing(true);
+        row2.setSpacing(false);
+        row2.getStyle().set("gap", "4px");
 
         for (int i = 0; i < grupos.length; i++) {
             String etiqueta = grupos[i][0];
@@ -595,8 +597,8 @@ public class MainView extends HorizontalLayout {
 
         HorizontalLayout row3 = new HorizontalLayout();
         row3.setWidthFull();
-        row3.add(btnTodos);
-        row3.setFlexGrow(1, btnTodos);
+        row3.setSpacing(false);
+        row3.getStyle().set("gap", "4px");
 
         wrapper.add(lbl, row1, row2, row3);
         return wrapper;
