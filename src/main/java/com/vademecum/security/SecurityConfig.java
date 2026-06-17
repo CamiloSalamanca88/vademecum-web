@@ -30,8 +30,8 @@ public class SecurityConfig extends VaadinWebSecurity {
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {
         UserDetails admin = User.builder()
-                .username("Admin")
-                .password(encoder.encode("Admin"))
+                .username("Farmacia")
+                .password(encoder.encode("AplicacionWeleda.4188"))
                 .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(admin);
