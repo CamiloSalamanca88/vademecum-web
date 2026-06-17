@@ -526,7 +526,7 @@ public class MainView extends HorizontalLayout {
         VerticalLayout wrapper = new VerticalLayout();
         wrapper.setPadding(true);
         wrapper.setSpacing(false);
-        wrapper.getStyle().set("gap", "6px").set("padding-top", "0");
+        wrapper.getStyle().set("gap", "4px").set("padding-top", "0").set("padding-bottom", "0");
 
         Span lbl = new Span("🔤  Filtrar por letra");
         lbl.getStyle().set("font-size", "11px").set("font-weight", "bold")
@@ -619,6 +619,7 @@ public class MainView extends HorizontalLayout {
                     .set("font-size", "12px")
                     .set("font-weight", "normal")
                     .set("border", "1px solid #CDC4A8");
+            btn.getStyle().set("min-height", "28px").set("height", "28px").set("font-size", "11px");
         }
     }
 }
