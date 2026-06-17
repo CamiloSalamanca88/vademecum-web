@@ -29,6 +29,8 @@ public class MainView extends HorizontalLayout {
     private Button btnFormaActivo = null;
     private ListBox<Medicamento> listaMedicamentos;
     private Span lblContador;
+    private String letraSeleccionada = "";
+    private Button btnLetraActivo = null;
 
     // Panel de detalle
     private H2 lblNombre;
@@ -70,7 +72,7 @@ public class MainView extends HorizontalLayout {
                 .set("flex-shrink", "0")
                 .set("overflow-y", "auto");
 
-        sidebar.add(buildTopBar(), buildFiltros(), buildLista());
+        sidebar.add(buildTopBar(), buildFiltros(), buildFiltroAlfabetico(), buildLista());
         return sidebar;
     }
 
@@ -183,6 +185,11 @@ public class MainView extends HorizontalLayout {
             if (btnFormaActivo != null) {
                 resetBtnForma(btnFormaActivo);
                 btnFormaActivo = null;
+            }
+            letraSeleccionada = "";
+            if (btnLetraActivo != null) {
+                estiloLetraBtn(btnLetraActivo, false);
+                btnLetraActivo = null;
             }
             cargarTodos();
         });
@@ -469,6 +476,28 @@ public class MainView extends HorizontalLayout {
     private void ejecutarBusqueda() {
         List<Medicamento> resultados = servicio.buscarCombinado(
                 txtPrincipio.getValue(), txtPatologia.getValue(), formaSeleccionada);
+
+        if (!letraSeleccionada.isEmpty()) {
+            String[] letrasDelGrupo = switch (letraSeleccionada) {
+                case "A-C" -> new String[]{"A", "B", "C"};
+                case "D-F" -> new String[]{"D", "E", "F"};
+                case "G-I" -> new String[]{"G", "H", "I"};
+                case "J-L" -> new String[]{"J", "K", "L"};
+                case "M-O" -> new String[]{"M", "N", "O"};
+                case "P-R" -> new String[]{"P", "Q", "R"};
+                case "S-U" -> new String[]{"S", "T", "U"};
+                case "V-Z" -> new String[]{"V", "W", "X", "Y", "Z"};
+                default -> new String[]{};
+            };
+            java.util.Set<String> letrasSet = new java.util.HashSet<>(java.util.Arrays.asList(letrasDelGrupo));
+            resultados = resultados.stream()
+                    .filter(m -> {
+                        String nombre = m.getNombreComercial().trim().toUpperCase();
+                        return !nombre.isEmpty() && letrasSet.contains(String.valueOf(nombre.charAt(0)));
+                    })
+                    .collect(java.util.stream.Collectors.toList());
+        }
+
         actualizarLista(resultados);
     }
 
@@ -492,5 +521,104 @@ public class MainView extends HorizontalLayout {
         txtMecanismo.setText(m.getMecanismoAccion());
         txtIndicaciones.setText(m.getIndicaciones());
         txtDosis.setText(m.getDosis());
+    }
+    private VerticalLayout buildFiltroAlfabetico() {
+        VerticalLayout wrapper = new VerticalLayout();
+        wrapper.setPadding(true);
+        wrapper.setSpacing(false);
+        wrapper.getStyle().set("gap", "6px").set("padding-top", "0");
+
+        Span lbl = new Span("🔤  Filtrar por letra");
+        lbl.getStyle().set("font-size", "11px").set("font-weight", "bold")
+                .set("color", "#6B7844").set("letter-spacing", "0.5px")
+                .set("text-transform", "uppercase");
+
+        String[][] grupos = {
+                {"A-C", "A", "B", "C"},
+                {"D-F", "D", "E", "F"},
+                {"G-I", "G", "H", "I"},
+                {"J-L", "J", "K", "L"},
+                {"M-O", "M", "N", "O"},
+                {"P-R", "P", "Q", "R"},
+                {"S-U", "S", "T", "U"},
+                {"V-Z", "V", "W", "X", "Y", "Z"}
+        };
+
+        HorizontalLayout row1 = new HorizontalLayout();
+        row1.setWidthFull();
+        row1.setSpacing(true);
+
+        HorizontalLayout row2 = new HorizontalLayout();
+        row2.setWidthFull();
+        row2.setSpacing(true);
+
+        for (int i = 0; i < grupos.length; i++) {
+            String etiqueta = grupos[i][0];
+            String[] letras = java.util.Arrays.copyOfRange(grupos[i], 1, grupos[i].length);
+
+            Button btn = new Button(etiqueta);
+            estiloLetraBtn(btn, false);
+            btn.addClickListener(e -> {
+                if (letraSeleccionada.equals(etiqueta)) {
+                    letraSeleccionada = "";
+                    estiloLetraBtn(btn, false);
+                    btnLetraActivo = null;
+                } else {
+                    if (btnLetraActivo != null) estiloLetraBtn(btnLetraActivo, false);
+                    letraSeleccionada = etiqueta;
+                    estiloLetraBtn(btn, true);
+                    btnLetraActivo = btn;
+                }
+                ejecutarBusqueda();
+            });
+
+            if (i < 4) {
+                row1.add(btn);
+                row1.setFlexGrow(1, btn);
+            } else {
+                row2.add(btn);
+                row2.setFlexGrow(1, btn);
+            }
+        }
+
+        Button btnTodos = new Button("Todos");
+        estiloLetraBtn(btnTodos, false);
+        btnTodos.getStyle().set("background", "#EDE8DC").set("color", "#504830");
+        btnTodos.addClickListener(e -> {
+            letraSeleccionada = "";
+            if (btnLetraActivo != null) {
+                estiloLetraBtn(btnLetraActivo, false);
+                btnLetraActivo = null;
+            }
+            ejecutarBusqueda();
+        });
+
+        HorizontalLayout row3 = new HorizontalLayout();
+        row3.setWidthFull();
+        row3.add(btnTodos);
+        row3.setFlexGrow(1, btnTodos);
+
+        wrapper.add(lbl, row1, row2, row3);
+        return wrapper;
+    }
+
+    private void estiloLetraBtn(Button btn, boolean activo) {
+        if (activo) {
+            btn.getStyle()
+                    .set("background", "#A27C40")
+                    .set("color", "white")
+                    .set("border-radius", "6px")
+                    .set("font-size", "12px")
+                    .set("font-weight", "bold")
+                    .set("border", "2px solid #A27C40");
+        } else {
+            btn.getStyle()
+                    .set("background", "#FFFDF8")
+                    .set("color", "#504830")
+                    .set("border-radius", "6px")
+                    .set("font-size", "12px")
+                    .set("font-weight", "normal")
+                    .set("border", "1px solid #CDC4A8");
+        }
     }
 }
