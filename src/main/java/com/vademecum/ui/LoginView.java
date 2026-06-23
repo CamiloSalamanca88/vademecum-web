@@ -15,6 +15,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import com.vaadin.flow.server.VaadinServletRequest;
+import com.vaadin.flow.server.VaadinServletResponse;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 
 @Route("login")
 @PageTitle("Iniciar sesión — Vademécum Antroposófico")
@@ -95,13 +103,24 @@ public class LoginView extends VerticalLayout {
                 .set("cursor", "pointer");
 
         // Acción login
+        SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
+
         Runnable doLogin = () -> {
             try {
                 Authentication auth = authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
                                 txtUsuario.getValue().trim(),
                                 txtPassword.getValue()));
-                SecurityContextHolder.getContext().setAuthentication(auth);
+
+                SecurityContext context = SecurityContextHolder.createEmptyContext();
+                context.setAuthentication(auth);
+                SecurityContextHolder.setContext(context);
+
+                // Persistir el login en la sesión HTTP (clave para que no se pierda)
+                HttpServletRequest request = VaadinServletRequest.getCurrent().getHttpServletRequest();
+                HttpServletResponse response = VaadinServletResponse.getCurrent().getHttpServletResponse();
+                securityContextRepository.saveContext(context, request, response);
+
                 getUI().ifPresent(ui -> ui.navigate(""));
             } catch (AuthenticationException ex) {
                 Notification notif = Notification.show("Usuario o contraseña incorrectos");
