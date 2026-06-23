@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Route("admin")
 @PageTitle("Panel de Administración · Vademécum")
-@RolesAllowed({"ADMIN", "ROLE_ADMIN"})
+@PermitAll
 public class AdminView extends VerticalLayout {
 
     private final BuscadorService servicio;
@@ -35,6 +35,19 @@ public class AdminView extends VerticalLayout {
         setSizeFull();
         setSpacing(false);
         setPadding(false);
+
+        // Verificación manual de acceso
+        var auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        boolean esAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!esAdmin) {
+            add(new com.vaadin.flow.component.html.Span("Acceso denegado."));
+            com.vaadin.flow.component.UI.getCurrent().navigate(MainView.class);
+            return;
+        }
+
         getStyle().set("background", "#FAF7EF")
                 .set("font-family", "Georgia, 'Times New Roman', serif");
 
