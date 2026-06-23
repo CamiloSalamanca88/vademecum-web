@@ -15,7 +15,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vademecum.model.Medicamento;
 import com.vademecum.service.BuscadorService;
-import jakarta.annotation.security.RolesAllowed;
+import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 import java.util.stream.Collectors;
