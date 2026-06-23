@@ -28,6 +28,7 @@ public class AdminView extends VerticalLayout {
     private final BuscadorService servicio;
     private Grid<Medicamento> grid;
     private TextField buscador;
+    private Span contador;
     private List<Medicamento> todosLosMedicamentos;
 
     public AdminView(BuscadorService servicio) {
@@ -108,8 +109,7 @@ public class AdminView extends VerticalLayout {
         buscador.setClearButtonVisible(true);
         buscador.addValueChangeListener(e -> filtrar(e.getValue()));
 
-        Span contador = new Span();
-        contador.setId("admin-contador");
+        contador = new Span();
         contador.getStyle()
                 .set("color", "#504830")
                 .set("font-size", "13px")
@@ -184,8 +184,6 @@ public class AdminView extends VerticalLayout {
 
     private void actualizarGrid(List<Medicamento> medicamentos) {
         grid.setItems(medicamentos);
-        Span contador = (Span) UI.getCurrent().getElement()
-                .getChild(0).getChild(1).getChild(1).getComponent().orElse(null);
         if (contador != null) {
             contador.setText(medicamentos.size() + " medicamento(s)");
         }
