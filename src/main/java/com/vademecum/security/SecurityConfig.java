@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -29,12 +28,21 @@ public class SecurityConfig extends VaadinWebSecurity {
 
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder encoder) {
-        UserDetails admin = User.builder()
+        // Usuario normal (solo lectura)
+        UserDetails usuario = User.builder()
                 .username("Farmacia")
                 .password(encoder.encode("AplicacionWeleda.4188"))
                 .roles("USER")
                 .build();
-        return new InMemoryUserDetailsManager(admin);
+
+        // Usuario administrador (puede editar)
+        UserDetails admin = User.builder()
+                .username("Admin")
+                .password(encoder.encode("Welcl.4188JG"))
+                .roles("ADMIN", "USER")
+                .build();
+
+        return new InMemoryUserDetailsManager(usuario, admin);
     }
 
     @Bean
