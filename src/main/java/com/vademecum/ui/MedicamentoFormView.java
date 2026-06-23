@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Route("admin/editar")
 @PageTitle("Editar Medicamento · Vademécum")
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "ROLE_ADMIN"})
 public class MedicamentoFormView extends VerticalLayout implements HasUrlParameter<String> {
 
     private final MedicamentoRepository repository;

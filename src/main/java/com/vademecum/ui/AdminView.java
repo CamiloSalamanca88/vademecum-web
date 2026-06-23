@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Route("admin")
 @PageTitle("Panel de Administración · Vademécum")
-@RolesAllowed("ADMIN")
+@RolesAllowed({"ADMIN", "ROLE_ADMIN"})
 public class AdminView extends VerticalLayout {
 
     private final BuscadorService servicio;
