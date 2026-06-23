@@ -24,6 +24,10 @@ public class SecurityConfig extends VaadinWebSecurity {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
+        http.authorizeHttpRequests(auth -> auth
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+        );
         super.configure(http);
         setLoginView(http, LoginView.class);
     }
