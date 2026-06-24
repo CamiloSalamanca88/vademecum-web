@@ -256,4 +256,4 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
 
         UI.getCurrent().navigate(AdminView.class);
     }
-}}
+}
