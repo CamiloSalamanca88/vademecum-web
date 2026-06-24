@@ -27,6 +27,11 @@ public class SecurityConfig extends VaadinWebSecurity {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers("/debug-roles").permitAll()
         );
+        http.logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login")
+                .permitAll()
+        );
         super.configure(http);
         setLoginView(http, LoginView.class);
     }
