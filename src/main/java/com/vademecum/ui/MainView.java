@@ -512,13 +512,7 @@ public class MainView extends HorizontalLayout {
                 .set("font-size", "11px")
                 .set("cursor", "pointer");
         btnLogout.addClickListener(e ->
-                com.vaadin.flow.component.UI.getCurrent().getPage().executeJs(
-                        "var form = document.createElement('form');" +
-                                "form.method = 'POST';" +
-                                "form.action = '/logout';" +
-                                "document.body.appendChild(form);" +
-                                "form.submit();"
-                ));
+                com.vaadin.flow.component.UI.getCurrent().getPage().setLocation("/logout"));
 
         derecha.add(statusYear, btnLogout);
 

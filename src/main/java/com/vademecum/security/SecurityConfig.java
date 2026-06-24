@@ -28,7 +28,7 @@ public class SecurityConfig extends VaadinWebSecurity {
                 .requestMatchers("/debug-roles").permitAll()
         );
         http.logout(logout -> logout
-                .logoutUrl("/logout")
+                .logoutRequestMatcher(new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/logout", "GET"))
                 .logoutSuccessUrl("/login")
                 .permitAll()
         );
