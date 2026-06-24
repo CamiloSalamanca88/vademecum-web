@@ -502,7 +502,19 @@ public class MainView extends HorizontalLayout {
         Span statusYear = new Span("© 2026");
         statusYear.getStyle().set("color", "#504830").set("font-size", "11px");
 
-        derecha.add(statusYear);
+        Button btnLogout = new Button("🚪 Salir");
+        btnLogout.getStyle()
+                .set("background", "transparent")
+                .set("color", "#A09870")
+                .set("border", "1px solid #504830")
+                .set("border-radius", "4px")
+                .set("padding", "2px 10px")
+                .set("font-size", "11px")
+                .set("cursor", "pointer");
+        btnLogout.addClickListener(e ->
+                com.vaadin.flow.component.UI.getCurrent().getPage().setLocation("/logout"));
+
+        derecha.add(statusYear, btnLogout);
 
         if (esAdmin()) {
             Button btnAdmin = new Button("⚙ Admin");
