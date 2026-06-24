@@ -17,11 +17,15 @@ public class BuscadorService {
     }
 
     public List<Medicamento> getTodos() {
-        return repository.findAll();
+        return repository.findAll().stream()
+                .filter(Medicamento::isVisible)
+                .collect(Collectors.toList());
     }
 
     public List<Medicamento> buscarCombinado(String principio, String patologia, String forma) {
-        List<Medicamento> resultado = repository.findAll();
+        List<Medicamento> resultado = repository.findAll().stream()
+                .filter(Medicamento::isVisible)
+                .collect(Collectors.toList());
 
         if (principio != null && !principio.trim().isEmpty()) {
             String txt = principio.trim().toLowerCase();
@@ -57,5 +61,8 @@ public class BuscadorService {
                 .filter(p -> p != null)
                 .distinct().sorted()
                 .collect(Collectors.toList());
+    }
+    public List<Medicamento> getTodosAdmin() {
+        return repository.findAll();
     }
 }

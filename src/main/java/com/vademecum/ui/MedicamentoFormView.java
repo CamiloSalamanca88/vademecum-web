@@ -30,8 +30,10 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
 
     private final MedicamentoRepository repository;
     private Medicamento medicamento;
+    private boolean esNuevo = false;
 
     // Campos del formulario
+    private TextField txtId;
     private TextField txtNombre;
     private TextField txtPrincipioActivo;
     private TextField txtConcentracion;
@@ -53,6 +55,13 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
 
     @Override
     public void setParameter(BeforeEvent event, String id) {
+        if ("NUEVO".equals(id)) {
+            this.medicamento = new Medicamento();
+            this.esNuevo = true;
+            construirVista();
+            return;
+        }
+
         Optional<Medicamento> opt = repository.findById(id);
         if (opt.isEmpty()) {
             Notification.show("Medicamento no encontrado", 3000, Notification.Position.MIDDLE)
@@ -61,6 +70,7 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
             return;
         }
         this.medicamento = opt.get();
+        this.esNuevo = false;
         construirVista();
     }
 
@@ -79,7 +89,8 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
                 .set("padding", "18px 28px")
                 .set("color", "white");
 
-        H2 title = new H2("Editar: " + medicamento.getNombreComercial());
+        String tituloTexto = esNuevo ? "Nuevo Medicamento" : "Editar: " + medicamento.getNombreComercial();
+        H2 title = new H2(tituloTexto);
         title.getStyle()
                 .set("color", "white")
                 .set("margin", "0")
@@ -106,6 +117,13 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
                 .set("max-width", "900px")
                 .set("margin", "0 auto");
 
+        // Campo ID (editable solo para nuevos)
+        txtId = crearCampoTexto("ID *", medicamento.getId());
+        txtId.setReadOnly(!esNuevo);
+        if (!esNuevo) {
+            txtId.getStyle().set("background", "#EDE8DC");
+        }
+
         // Campos
         txtNombre = crearCampoTexto("Nombre Comercial *", medicamento.getNombreComercial());
         txtPrincipioActivo = crearCampoTexto("Principio Activo", medicamento.getPrincipioActivo());
@@ -126,7 +144,8 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
         botones.setSpacing(true);
         botones.getStyle().set("margin-top", "16px");
 
-        Button btnGuardar = new Button("💾  Guardar Cambios");
+        String textoBoton = esNuevo ? "💾  Crear Medicamento" : "💾  Guardar Cambios";
+        Button btnGuardar = new Button(textoBoton);
         btnGuardar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         btnGuardar.getStyle()
                 .set("background", "#2D4A2B")
@@ -148,7 +167,7 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
 
         form.add(
                 seccionTitulo("📋  Información Básica"),
-                txtNombre, txtPrincipioActivo, txtConcentracion, txtFormaFarmaceutica, txtCategoria,
+                txtId, txtNombre, txtPrincipioActivo, txtConcentracion, txtFormaFarmaceutica, txtCategoria,
                 seccionTitulo("🌿  Información Clínica"),
                 txtPatologias, txtMecanismo, txtIndicaciones, txtDosis,
                 botones
@@ -185,6 +204,23 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
     }
 
     private void guardar() {
+        // Validar ID
+        if (esNuevo) {
+            String idNuevo = txtId.getValue();
+            if (idNuevo == null || idNuevo.trim().isEmpty()) {
+                Notification.show("El ID es obligatorio", 3000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return;
+            }
+            if (repository.findById(idNuevo.trim()).isPresent()) {
+                Notification.show("Ya existe un medicamento con ese ID", 3000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return;
+            }
+            medicamento.setId(idNuevo.trim());
+        }
+
+        // Validar nombre
         if (txtNombre.getValue() == null || txtNombre.getValue().trim().isEmpty()) {
             Notification.show("El nombre comercial es obligatorio", 3000, Notification.Position.MIDDLE)
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
@@ -214,9 +250,10 @@ public class MedicamentoFormView extends VerticalLayout implements HasUrlParamet
 
         repository.save(medicamento);
 
-        Notification.show("✅ Medicamento actualizado correctamente", 3000, Notification.Position.TOP_CENTER)
+        String mensajeExito = esNuevo ? "✅ Medicamento creado correctamente" : "✅ Medicamento actualizado correctamente";
+        Notification.show(mensajeExito, 3000, Notification.Position.TOP_CENTER)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
         UI.getCurrent().navigate(AdminView.class);
     }
-}
+}}

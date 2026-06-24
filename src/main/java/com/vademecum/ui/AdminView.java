@@ -3,8 +3,10 @@ package com.vademecum.ui;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -14,6 +16,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vademecum.model.Medicamento;
+import com.vademecum.repository.MedicamentoRepository;
 import com.vademecum.service.BuscadorService;
 import jakarta.annotation.security.PermitAll;
 
@@ -26,13 +29,15 @@ import java.util.stream.Collectors;
 public class AdminView extends VerticalLayout {
 
     private final BuscadorService servicio;
+    private final MedicamentoRepository repository;
     private Grid<Medicamento> grid;
     private TextField buscador;
     private Span contador;
     private List<Medicamento> todosLosMedicamentos;
 
-    public AdminView(BuscadorService servicio) {
+    public AdminView(BuscadorService servicio, MedicamentoRepository repository) {
         this.servicio = servicio;
+        this.repository = repository;
         setSizeFull();
         setSpacing(false);
         setPadding(false);
@@ -44,8 +49,8 @@ public class AdminView extends VerticalLayout {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         if (!esAdmin) {
-            add(new com.vaadin.flow.component.html.Span("Acceso denegado."));
-            com.vaadin.flow.component.UI.getCurrent().navigate(MainView.class);
+            add(new Span("Acceso denegado."));
+            UI.getCurrent().navigate(MainView.class);
             return;
         }
 
@@ -115,7 +120,15 @@ public class AdminView extends VerticalLayout {
                 .set("font-size", "13px")
                 .set("margin-left", "20px");
 
-        toolbar.add(buscador, contador);
+        Button btnNuevo = new Button("＋ Nuevo Medicamento", e ->
+                UI.getCurrent().navigate("admin/editar/NUEVO"));
+        btnNuevo.getStyle()
+                .set("background", "#2D4A2B")
+                .set("color", "white")
+                .set("border-radius", "6px")
+                .set("margin-left", "auto");
+
+        toolbar.add(buscador, contador, btnNuevo);
         return toolbar;
     }
 
@@ -150,6 +163,22 @@ public class AdminView extends VerticalLayout {
                 .setFlexGrow(1);
 
         grid.addComponentColumn(med -> {
+            Span estado = new Span(med.isVisible() ? "✅" : "🚫");
+            estado.getStyle().set("cursor", "pointer").set("font-size", "18px");
+            estado.getElement().setAttribute("title",
+                    med.isVisible() ? "Visible — clic para ocultar" : "Oculto — clic para mostrar");
+            estado.addClickListener(e -> {
+                med.setVisible(!med.isVisible());
+                repository.save(med);
+                grid.getDataProvider().refreshItem(med);
+            });
+            return estado;
+        }).setHeader("Visible").setWidth("80px").setFlexGrow(0);
+
+        grid.addComponentColumn(med -> {
+            HorizontalLayout acciones = new HorizontalLayout();
+            acciones.setSpacing(true);
+
             Button btnEditar = new Button("✏️ Editar");
             btnEditar.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SMALL);
             btnEditar.getStyle()
@@ -158,14 +187,21 @@ public class AdminView extends VerticalLayout {
                     .set("border-radius", "4px");
             btnEditar.addClickListener(e ->
                     UI.getCurrent().navigate(MedicamentoFormView.class, med.getId()));
-            return btnEditar;
-        }).setHeader("Acciones").setWidth("120px").setFlexGrow(0);
+
+            Button btnEliminar = new Button("🗑");
+            btnEliminar.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_SMALL);
+            btnEliminar.getStyle().set("border-radius", "4px");
+            btnEliminar.addClickListener(e -> confirmarEliminacion(med));
+
+            acciones.add(btnEditar, btnEliminar);
+            return acciones;
+        }).setHeader("Acciones").setWidth("200px").setFlexGrow(0);
 
         return grid;
     }
 
     private void cargarMedicamentos() {
-        todosLosMedicamentos = servicio.getTodos();
+        todosLosMedicamentos = servicio.getTodosAdmin();
         actualizarGrid(todosLosMedicamentos);
     }
 
@@ -187,5 +223,28 @@ public class AdminView extends VerticalLayout {
         if (contador != null) {
             contador.setText(medicamentos.size() + " medicamento(s)");
         }
+    }
+
+    private void confirmarEliminacion(Medicamento med) {
+        Dialog dialogo = new Dialog();
+        dialogo.setCloseOnOutsideClick(false);
+        dialogo.setWidth("400px");
+
+        Paragraph mensaje = new Paragraph("¿Eliminar \"" + med.getNombreComercial() + "\" permanentemente?");
+        mensaje.getStyle().set("font-size", "15px").set("color", "#504830");
+
+        Button btnConfirmar = new Button("Sí, eliminar", e -> {
+            repository.delete(med);
+            todosLosMedicamentos.remove(med);
+            actualizarGrid(todosLosMedicamentos);
+            dialogo.close();
+        });
+        btnConfirmar.addThemeVariants(ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_PRIMARY);
+
+        Button btnCancelar = new Button("Cancelar", e -> dialogo.close());
+
+        HorizontalLayout botones = new HorizontalLayout(btnConfirmar, btnCancelar);
+        dialogo.add(mensaje, botones);
+        dialogo.open();
     }
 }

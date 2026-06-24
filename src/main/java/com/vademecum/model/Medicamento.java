@@ -53,6 +53,9 @@ public class Medicamento {
     @Column(length = 500)
     private String laboratorio;
 
+    @Column(nullable = false)
+    private boolean visible = true;
+
     // Constructor vacío requerido por JPA
     public Medicamento() {}
 
@@ -76,6 +79,7 @@ public class Medicamento {
         this.interacciones = interacciones;
         this.categoria = categoria;
         this.laboratorio = laboratorio;
+        this.visible = true;
     }
 
     // Getters
@@ -109,4 +113,6 @@ public class Medicamento {
     public void setInteracciones(String interacciones) { this.interacciones = interacciones; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
     public void setLaboratorio(String laboratorio) { this.laboratorio = laboratorio; }
+    public boolean isVisible() { return visible; }
+    public void setVisible(boolean visible) { this.visible = visible; }
 }
