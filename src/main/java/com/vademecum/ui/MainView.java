@@ -499,7 +499,7 @@ public class MainView extends HorizontalLayout {
                 .set("align-items", "center")
                 .set("gap", "16px");
 
-        Span statusYear = new Span("© 2026");
+        Span statusYear = new Span("© 2026 Camilo Salamanca");
         statusYear.getStyle().set("color", "#504830").set("font-size", "11px");
 
         Button btnLogout = new Button("🚪 Salir");
