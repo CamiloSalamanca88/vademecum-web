@@ -128,7 +128,14 @@ public class AdminView extends VerticalLayout {
                 .set("border-radius", "6px")
                 .set("margin-left", "auto");
 
-        toolbar.add(buscador, contador, btnNuevo);
+        Button btnUsuarios = new Button("👥 Usuarios", e ->
+                UI.getCurrent().navigate("admin/usuarios"));
+        btnUsuarios.getStyle()
+                .set("background", "#A27C40")
+                .set("color", "white")
+                .set("border-radius", "6px");
+
+        toolbar.add(buscador, contador, btnUsuarios, btnNuevo);
         return toolbar;
     }
 
